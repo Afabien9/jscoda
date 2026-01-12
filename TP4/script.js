@@ -82,7 +82,7 @@ function triParSelection(tabEleves) {
 console.log("--- Initialisation de la classe ---");
 let maClasse = genererEleves();
 
-console.log("--- Liste des élèvescnon triée ---");
+console.log("--- Liste des élèves non triée ---");
 afficherEleves(maClasse);
 
 console.log("--- Statistiques de la classe ---");
