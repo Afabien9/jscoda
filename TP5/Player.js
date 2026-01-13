@@ -1,160 +1,212 @@
+const configTouches = {
+  HAUT: "KeyW",
+  BAS: "KeyS",
+  GAUCHE: "KeyA",
+  DROITE: "KeyD",
+  ATTAQUE: "KeyE",
+  MORT_TEST: "KeyR"
+};
+
 class Player {
-  constructor(pseudo, skin, positionx, positiony) {
-    
-    this.pseudo = pseudo;
-    this.skin = skin;
-    this.positionx = positionx;
-    this.positiony = positiony;
+  constructor(pseudo, x, y, spriteSheetSrc) {
+      // Informations de base
+      this.pseudo = pseudo;
+      this.x = x;
+      this.y = y;
+      this.img = new Image();
+      this.img.src = spriteSheetSrc;
 
-    
-    this.isDying = false;
-    this.isWalking = false;
-    this.isAttacking = false;
-    
-    
-    this.walkSpriteDuration = 2;   
-    this.WalkSpriteIndex = 0;     
-    this.WalkSpritNumber = 9;     
-    this.currentWalkSpriteStep = 0;
+      // Statistiques de combat (issues de test.js)
+      this.hpMax = 100;
+      this.hp = 100;
+      this.ATK = 20;
+      this.speed = 2;
+      this.isAlive = true;
+      this.direction = "Sud";
 
-    
-    this.attackSpritDuration = 2;
-    this.attackSpritIndex = 0;
-    this.attackSpritNumber = 6;
-    this.currentAttackPlayerSprite = 0;
+      // États d'animation
+      this.moving = false;
+      this.ATKing = false;
+      this.dying = false;
+      this.dead = false;
 
-    
-    this.DyingSpritDuration = 2;
-    this.DyingSpritIndex = 0;
-    this.DyingSpritNumber = 6;
-    this.currentDyingPlayerSprite = 0;
-  }
+      // Configuration Spritesheet
+      this.spriteSize = 64;
+      this.spriteSizeATK = 128;
 
-  
-  update(updateData) {
-    this.hp = updateData.hp;
-    this.hpMax = updateData.hpMax;
-    this.attack = updateData.attack;
-    this.level = updateData.level;
-    this.speed = updateData.speed;
-    this.cooldown = updateData.cooldown;
-    this.cooldownMax = updateData.cooldownMax;
-    this.heal = updateData.heal;
-    this.isDying = updateData.isAlive;
-    this.isWalking = updateData.isWalking;
-    this.isattacking = updateData.isAttacking;
-    this.walkSpriteDuration= updateData.walkSpriteDuration;
-    this.WalkSpriteIndex = updateData.WalkSpriteIndex;
-    this.WalkSpritNumber = updateData.WalkSpritNumber;
-    this.currentWalkSpriteStep = updateData.currentWalkSpriteStep
-    this.currentAttackPlayerSprite
-    this.attackSpritDuration
-    this.attackSpritIndex
-    this.attackSpritNumber
+      // Animation de MARCHE
+      this.currentWalkSpriteStep = 0;
+      this.walkSpriteDuration = 4;
+      this.walkSpriteIndex = 0;
+      this.walkSpriteNumber = 9;
+
+      // Animation d'ATTAQUE
+      this.currentAttackSpriteStep = 0;
+      this.attackSpriteDuration = 4;
+      this.attackSpriteIndex = 0;
+      this.attackSpriteNumber = 6;
+
+      // Animation de MORT
+      this.currentDyingSpriteStep = 0;
+      this.dyingSpriteDuration = 6;
+      this.dyingSpriteIndex = 0;
+      this.dyingSpriteNumber = 6;
   }
 
 
   animate() {
-    let animationFinished = false;
+      if (this.dead) return;
 
-    // Logique des états
-    if (this.isDying) {
-      this.currentDyingPlayerSprite++;
-      if (this.currentDyingPlayerSprite >= this.DyingSpritDuration) {
-        this.currentDyingPlayerSprite = 0;
-        this.DyingSpritIndex++;
+      //MORT
+      if (this.dying) {
+          this.currentDyingSpriteStep++;
+          if (this.currentDyingSpriteStep >= this.dyingSpriteDuration) {
+              this.currentDyingSpriteStep = 0;
+              this.dyingSpriteIndex++;
+          }
+          if (this.dyingSpriteIndex >= this.dyingSpriteNumber) {
+              this.dyingSpriteIndex = this.dyingSpriteNumber - 1;
+              this.dead = true;
+          }
+      } 
+      //ATTAQUE
+      else if (this.ATKing || this.attackSpriteIndex > 0) {
+          this.currentAttackSpriteStep++;
+          if (this.currentAttackSpriteStep >= this.attackSpriteDuration) {
+              this.currentAttackSpriteStep = 0;
+              this.attackSpriteIndex++;
+          }
+          if (this.attackSpriteIndex >= this.attackSpriteNumber) {
+              this.attackSpriteIndex = 0;
+              this.ATKing = false; 
+          }
+      } 
+      //MARCHE
+      else if (this.moving) {
+          this.currentWalkSpriteStep++;
+          if (this.currentWalkSpriteStep >= this.walkSpriteDuration) {
+              this.currentWalkSpriteStep = 0;
+              this.walkSpriteIndex++;
+          }
+          if (this.walkSpriteIndex >= this.walkSpriteNumber) {
+              this.walkSpriteIndex = 0;
+          }
+      } 
+      // IDLE
+      else {
+          this.walkSpriteIndex = 0;
       }
-      if (this.DyingSpritIndex >= this.DyingSpritNumber) {
-        this.DyingSpritIndex = this.DyingSpritNumber - 1; 
-        animationFinished = true; 
+  }
+
+  draw(ctx) {
+      let sx, sy;
+      let sWidth = this.spriteSize;
+      let sHeight = this.spriteSize;
+      let offsetX = 0; 
+      let offsetY = 0;
+
+      // MORT
+      if (this.dying || this.dead) {
+          sy = 20 * this.spriteSize;
+          sx = this.dyingSpriteIndex * this.spriteSize;
+      } 
+      // ATTAQUE
+      else if (this.ATKing || this.attackSpriteIndex > 0) {
+          sWidth = this.spriteSizeATK;
+          sHeight = this.spriteSizeATK;
+          offsetX = -32; 
+          offsetY = -32;
+
+          const rows = { "North": 3456, "West": 3648, "Sud": 3840, "Est": 4032 };
+          sy = rows[this.direction];
+          sx = this.attackSpriteIndex * this.spriteSizeATK;
+      } 
+      //MARCHE
+      else {
+          const rows = { "North": 8, "West": 9, "Sud": 10, "Est": 11 };
+          sy = rows[this.direction] * this.spriteSize;
+          sx = this.walkSpriteIndex * this.spriteSize;
       }
-    } 
-    // Logique attaque
-    else if (this.isAttacking) {
-      this.currentAttackPlayerSprite++;
-      if (this.currentAttackPlayerSprite >= this.attackSpritDuration) {
-        this.currentAttackPlayerSprite = 0;
-        this.attackSpritIndex++;
-      }
-      if (this.attackSpritIndex >= this.attackSpritNumber) {
-        this.attackSpritIndex = 0; 
-      }
-    } 
-    // Logique marche
-    else if (this.isWalking) {
-      this.currentWalkSpriteStep++;
-      if (this.currentWalkSpriteStep >= this.walkSpriteDuration) {
-        this.currentWalkSpriteStep = 0;
-        this.WalkSpriteIndex++;
-      }
-      if (this.WalkSpriteIndex >= this.WalkSpritNumber) {
-        this.WalkSpriteIndex = 0; 
-      }
-    }
-    return animationFinished;
+
+      ctx.drawImage(
+          this.img,
+        sx, sy,             // Source X, Y
+        sWidth, 
+        sHeight,    // Source Largeur, Hauteur
+        this.x + offsetX,   // Destination X avec décalage
+        this.y + offsetY,   // Destination Y avec décalage
+        sWidth, sHeight
+      );
   }
 }
 
-//  INITIALISATION ET SIMULATION 
 
-const alex = new Player("alex", 42, 1, [0, 0]);
-let tempsRestantAction = 0; 
+const canvas = document.getElementById("gameCanvas");
+const ctx = canvas.getContext("2d");
 
-for (let i = 0; i < 30; i++) {
-  
-  
-  if (tempsRestantAction <= 0 && !alex.isDying) {
-    
-    // Réinitialisation de tous les états
-    alex.isWalking = false;
-    alex.isAttacking = false;
-    alex.isDying = false;
-    
-    alex.WalkSpriteIndex = 0;
-    alex.currentWalkSpriteStep = 0;
-    alex.attackSpritIndex = 0;
-    alex.currentAttackPlayerSprite = 0;
+const player = new Player("alexis", 100, 100, "character-spritesheet.png");
+const keys = {};
 
-    // Choix aléatoire
-    const choix = Math.floor(Math.random() * 3); 
-    if (choix === 0) alex.isWalking = true;
-    else if (choix === 1) alex.isAttacking = true;
-    else if (choix === 2) alex.isDying = true;
-    
-    // Définit la durée de l'action
-    tempsRestantAction = Math.floor(Math.random() * 5) + 4;
+// Ecouteurs de touches
+window.addEventListener("keydown", (e) => {
+  keys[e.code] = true;
+  if (e.code === configTouches.ATTAQUE) player.ATKing = true;
+  if (e.code === configTouches.MORT_TEST) player.dying = true;
+});
 
-    console.log("===========================================");
-    console.log(` changement d'état : ${alex.isDying ? 'mort' : alex.isAttacking ? 'attaque' : 'marche'}`);
-    console.log("===========================================");
+window.addEventListener("keyup", (e) => {
+  keys[e.code] = false;
+});
+
+/**
+* LOGIQUE DE MOUVEMENT
+*/
+function updateMovement() {
+  if (player.dying || player.dead || player.ATKing) {
+      player.moving = false;
+      return;
   }
 
-  tempsRestantAction--;
-  const mortTerminee = alex.animate(); 
+  player.moving = false;
 
-  // Affichage des données
-  console.log("----------------MARCHE----------------")
-  console.log("isWalking", alex.isWalking);
-  console.log("WalkSpriteIndex", alex.WalkSpriteIndex);
-  console.log("currentWalkSpriteStep", alex.currentWalkSpriteStep)
-
-  console.log("----------------ATTAQUE----------------")
-  console.log("isattack", alex.isAttacking);
-  console.log("attackindex", alex.attackSpritIndex);
-  console.log("cuurentattack", alex.currentAttackPlayerSprite)
-
-  console.log("----------------MORT----------------")
-  console.log("isdying", alex.isDying);
-  console.log("dyingindex", alex.DyingSpritIndex);
-  console.log("currentdying", alex.currentDyingPlayerSprite)
-
-  if (alex.isDying === true) {
-    console.log("vous etes Mort")
+  if (keys[configTouches.HAUT]) {
+      player.y -= player.speed;
+      player.direction = "North";
+      player.moving = true;
+  } else if (keys[configTouches.BAS]) {
+      player.y += player.speed;
+      player.direction = "Sud";
+      player.moving = true;
   }
 
-  // Condition de sortie
-  if (alex.isDying && mortTerminee) {
-    console.log("\nFin du jeu");
-    break;
+  if (keys[configTouches.GAUCHE]) {
+      player.x -= player.speed;
+      player.direction = "West";
+      player.moving = true;
+  } else if (keys[configTouches.DROITE]) {
+      player.x += player.speed;
+      player.direction = "Est";
+      player.moving = true;
   }
+
+  // Collision bords canvas
+  player.x = Math.max(0, Math.min(canvas.width - 64, player.x));
+  player.y = Math.max(0, Math.min(canvas.height - 64, player.y));
 }
+
+
+function gameLoop() {
+  updateMovement();
+  player.animate();
+
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  player.draw(ctx);
+
+  requestAnimationFrame(gameLoop);
+}
+
+// Lancement après chargement de l'image
+player.img.onload = () => {
+  console.log("Jeu démarré");
+  gameLoop();
+};
