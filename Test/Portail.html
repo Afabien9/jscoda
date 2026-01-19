@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JS Arena - Portail</title>
+    <link rel="stylesheet" href="Portail.css">
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <main class="portail-container" style="width: 650px;">
+        <header>
+            <h1>JS <span class="highlight">ARENA</span></h1>
+            <p class="subtitle">Préparez-vous au combat (Local)</p>
+        </header>
+        
+        <div style="display: flex; gap: 30px;">
+            <div style="flex: 1;">
+                <h3 class="highlight">JOUEUR 1 (ZQSD)</h3>
+                <div class="form-group">
+                    <label for="pseudo1">Pseudo</label>
+                    <input type="text" id="pseudo1" placeholder="Ninja 1" autocomplete="off">
+                </div>
+                <section class="skin-section">
+                    <label>Skin J1</label>
+                    <div id="skin-selector-1" class="skin-grid" style="grid-template-columns: repeat(3, 1fr);"></div>
+                </section>
+            </div>
+
+            <div style="flex: 1;">
+                <h3 class="highlight" style="color: #ff4d4d;">JOUEUR 2 (FLÈCHES)</h3>
+                <div class="form-group">
+                    <label for="pseudo2">Pseudo</label>
+                    <input type="text" id="pseudo2" placeholder="Ninja 2" autocomplete="off">
+                </div>
+                <section class="skin-section">
+                    <label>Skin J2</label>
+                    <div id="skin-selector-2" class="skin-grid" style="grid-template-columns: repeat(3, 1fr);"></div>
+                </section>
+            </div>
+        </div>
+
+        <button id="btn-jouer">LANCER LE COMBAT</button>
+    </main>
+    <script src="Portail.js"></script>
+</body>
+</html>
