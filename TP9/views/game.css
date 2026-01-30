@@ -1,0 +1,99 @@
+:root {
+    --primary: #00d4ff;
+    --bg: #0b0d11;
+    --panel: rgba(28, 31, 38, 0.85);
+    --border: #30363d;
+    --danger: #ff4d4d;
+    --success: #00ff88;
+}
+
+body {
+    margin: 0;
+    background-color: var(--bg);
+    color: white;
+    font-family: 'Rajdhani', sans-serif;
+    overflow: hidden;
+}
+
+.main-wrapper {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+}
+
+canvas {
+    display: block;
+    background: #000;
+    image-rendering: pixelated;
+}
+
+/* KILL FEED (Haut Gauche) */
+.kill-feed {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    pointer-events: none;
+    z-index: 10;
+}
+
+.kill-msg {
+    background: rgba(0, 0, 0, 0.7);
+    padding: 10px 20px;
+    border-left: 4px solid var(--primary);
+    border-radius: 4px;
+    font-weight: 700;
+    font-size: 1.1rem;
+    animation: slideIn 0.3s ease-out;
+}
+
+.killer { color: var(--primary); }
+.victim { color: var(--danger); }
+
+@keyframes slideIn {
+    from { transform: translateX(-20px); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+/* LEADERBOARD (Droit) */
+.leaderboard-panel {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 260px;
+    background: var(--panel);
+    border-radius: 8px;
+    padding: 15px;
+    border: 2px solid var(--primary);
+    box-shadow: 0 0 15px rgba(0, 212, 255, 0.2);
+    pointer-events: none;
+}
+
+.rank-header {
+    color: var(--primary);
+    font-size: 1.4rem;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 12px;
+    border-bottom: 2px solid var(--primary);
+    letter-spacing: 2px;
+}
+
+.rank-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.rank-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 12px;
+    background: rgba(255,255,255,0.05);
+    font-size: 1rem;
+    border-radius: 4px;
+}
+
+.rank-lvl { color: var(--primary); font-weight: bold; }
